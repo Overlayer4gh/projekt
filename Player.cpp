@@ -7,7 +7,7 @@ Player::Player() : eq(100,50,15,8) {
 	else {
 		sprite.emplace(texture);
 		sprite->setTextureRect(sf::IntRect(sf::Vector2i(0, 0), frameSize));
-		// Pobierz rozmiar sprite'a
+		
 		sprite->setTextureRect(sf::IntRect({ 0, 0 }, frameSize));
 		sprite->setOrigin(sf::Vector2f(frameSize.x / 2.f, frameSize.y / 2.f));
 		sprite->setPosition(sf::Vector2f(100.f, 100.f));
@@ -32,7 +32,7 @@ void Player::render(sf::RenderWindow& window) {
 	window.draw(healthBar);
 	sf::RectangleShape manaBarBack(sf::Vector2f(104.f, 14.f));
 	manaBarBack.setFillColor(sf::Color(100, 100, 100));
-	manaBarBack.setPosition({ 10.f, 28.f }); // 10 px pod paskiem zdrowia + 4 px odstêpu
+	manaBarBack.setPosition({ 10.f, 28.f }); // 10 px pod paskiem zdrowia + 4 px odstÃªpu
 
 	sf::RectangleShape manaBar(sf::Vector2f(100.f * (float)eq.mana / eq.maxMana, 10.f));
 	manaBar.setFillColor(sf::Color(20, 20, 250)); // niebieski
@@ -68,7 +68,7 @@ void Player::updateAnimation(float deltaTime) {
 		if (attackTimer >= attackDuration) {
 			isAttacking = false;
 			currentFrame = 0;
-			currentRow = 0; // wróæ do idle lub chodzenia po zakoñczeniu ataku
+			currentRow = 0; // wrÃ³Ã¦ do idle lub chodzenia po zakoÃ±czeniu ataku
 		}
 		else {
 			currentRow = attackDirection; // ustaw wiersz animacji na kierunek ataku
@@ -80,7 +80,7 @@ void Player::updateAnimation(float deltaTime) {
 			currentFrame = (currentFrame + 1) % frameCount;
 		}
 		// normalna animacja (idle lub chodzenie)
-		// currentRow ustalasz w zale¿noœci od ruchu
+		
 	}
 
 
@@ -88,7 +88,7 @@ void Player::updateAnimation(float deltaTime) {
 
 
 
-		// Wyznacz prostok¹t: (klatka_x, klatka_y)
+		// Wyznacz prostokÂ¹t: (klatka_x, klatka_y)
 		sf::Vector2i framePos = {
 			currentFrame * frameSize.x,
 			currentRow * frameSize.y
@@ -117,7 +117,7 @@ void Player::movePlayer(const sf::Vector2u& windowSize, float deltaTime) {
 
 	if (!isAttacking) {
 		if (movement != sf::Vector2f(0.f, 0.f)) {
-			// Normalize movement vector (dla ruchu diagonalnego)
+			
 			float length = std::sqrt(movement.x * movement.x + movement.y * movement.y);
 			movement /= length;
 			movement *= speed * deltaTime;
@@ -125,10 +125,10 @@ void Player::movePlayer(const sf::Vector2u& windowSize, float deltaTime) {
 			currentRow = 1; // chodzenie
 			sprite->move(movement);
 
-			// Zapamiêtaj ostatni kierunek ruchu (potrzebne do ataku)
+			
 			lastMovement = movement;
 
-			// Ustaw flip zale¿nie od kierunku ruchu (x)
+			// Ustaw flip zaleÂ¿nie od kierunku ruchu (x)
 			if (movement.x < 0) {
 				sprite->setScale({ -1.f, 1.f });
 				isFacingLeft = true;
@@ -139,7 +139,7 @@ void Player::movePlayer(const sf::Vector2u& windowSize, float deltaTime) {
 			}
 		}
 		else {
-			currentRow = 0; // idle
+			currentRow = 0; 
 		}
 
 		if (!isAttacking && sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::Space)) {
@@ -150,15 +150,15 @@ void Player::movePlayer(const sf::Vector2u& windowSize, float deltaTime) {
 				else direction = 2;                       // atak lewo (flip animacji prawej)
 			}
 			else {
-				if (lastMovement.y > 0) direction = 4;   // atak dó³
-				else direction = 6;                       // atak góra
+				if (lastMovement.y > 0) direction = 4;   // atak dÃ³Â³
+				else direction = 6;                       // atak gÃ³ra
 			}
 
 			startAttack(direction);
 		}
 	}
 
-	// Kolizja i ograniczenia ekranu jak wczeœniej...
+	// Kolizja i ograniczenia ekranu jak wczeÅ“niej...
 
 	sf::Vector2f newPos = sprite->getPosition();
 
@@ -187,8 +187,8 @@ void Player::startAttack(int direction) {
 		attackDirection = direction;
 		currentFrame = 0;
 
-		// Skalowanie sprite (flip) jeœli atak w lewo
-		if (attackDirection == 2) {  // 2 to u Ciebie kod ataku w lewo
+		
+		if (attackDirection == 2) { 
 			sprite->setScale({ -1.f, 1.f });  // flip poziomy
 			isFacingLeft = true;
 		}
