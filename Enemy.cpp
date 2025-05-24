@@ -17,7 +17,7 @@ void Enemy::update(float deltaTime) {
         frameTimer = 0.f;
         currentFrame = (currentFrame + 1) % frameCount;
 
-        // ustawiamy prostok¹t na aktualn¹ klatkê w pierwszym wierszu (y=0)
+       
         sprite->setTextureRect(sf::IntRect({ currentFrame * frameSize.x , 0 }, { frameSize.x, frameSize.y }));
     }
 }
