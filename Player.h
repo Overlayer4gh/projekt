@@ -18,6 +18,7 @@ public:
 	void updateAnimation(float deltaTime);
 	void startAttack(int direction);
 	void render(sf::RenderWindow& window);
+	sf::Vector2f getPosition() const;  // dodane do pobierania pozycji gracza
 
 	// poruszanie i animacje
 	int currentFrame = 0;

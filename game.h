@@ -9,7 +9,7 @@
 #include "mapa.h"
 #include "Player.h"
 #include "Enemy.h"
-
+#include "Globals.hpp"
 
 
 
@@ -34,6 +34,7 @@ private:
 	void initVariables();
 	void initWindow();
 	int initMap();
+	void initGlobals();
 
 
 public:

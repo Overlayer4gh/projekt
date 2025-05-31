@@ -1,5 +1,8 @@
 #include "Player.h"
 #include <iostream>
+#include <string>
+#include "Globals.hpp"
+
 Player::Player() : eq(100,50,15,8) {
 	if (!texture.loadFromFile("assets/animacje1.png")) {
 		std::cout << "Error loading texture" << std::endl;
@@ -7,7 +10,6 @@ Player::Player() : eq(100,50,15,8) {
 	else {
 		sprite.emplace(texture);
 		sprite->setTextureRect(sf::IntRect(sf::Vector2i(0, 0), frameSize));
-		
 		sprite->setTextureRect(sf::IntRect({ 0, 0 }, frameSize));
 		sprite->setOrigin(sf::Vector2f(frameSize.x / 2.f, frameSize.y / 2.f));
 		sprite->setPosition(sf::Vector2f(100.f, 100.f));
@@ -19,31 +21,48 @@ Player::Player() : eq(100,50,15,8) {
 void Player::render(sf::RenderWindow& window) {
 	window.draw(sprite.value());
 
-	// Pasek zdrowia
-	sf::RectangleShape healthBarBack(sf::Vector2f(104.f, 14.f));
+	// Pasek zdrowia (t³o)
+	sf::RectangleShape healthBarBack(sf::Vector2f(180.f, 20.f));  
 	healthBarBack.setFillColor(sf::Color(100, 100, 100));
-	healthBarBack.setPosition({ 10.f, 10.f });
+	healthBarBack.setPosition({ 14.f, 14.f });
 
-	sf::RectangleShape healthBar(sf::Vector2f(100.f * (float)eq.hp / eq.maxHp, 10.f));
+	// Pasek zdrowia (aktualny)
+	sf::RectangleShape healthBar(sf::Vector2f(180.f * (float)eq.hp / eq.maxHp, 20.f)); 
 	healthBar.setFillColor(sf::Color(250, 20, 20));
-	healthBar.setPosition({ 12.f, 12.f });
+	healthBar.setPosition({ 14.f, 14.f }); 
 
 	window.draw(healthBarBack);
 	window.draw(healthBar);
-	sf::RectangleShape manaBarBack(sf::Vector2f(104.f, 14.f));
-	manaBarBack.setFillColor(sf::Color(100, 100, 100));
-	manaBarBack.setPosition({ 10.f, 28.f }); // 10 px pod paskiem zdrowia + 4 px odstÃªpu
 
-	sf::RectangleShape manaBar(sf::Vector2f(100.f * (float)eq.mana / eq.maxMana, 10.f));
-	manaBar.setFillColor(sf::Color(20, 20, 250)); // niebieski
-	manaBar.setPosition({ 12.f, 30.f });
+	// Tekst HP
+	sf::Text hpText(globalFont, std::to_string(eq.hp) + " / " + std::to_string(eq.maxHp), 12);
+	hpText.setFont(globalFont);
+	hpText.setCharacterSize(12); 
+	hpText.setFillColor(sf::Color::White);
+	hpText.setPosition(sf::Vector2f(14.f + 90.f - hpText.getLocalBounds().size.x / 2.f, 14.f + 2.f)); // wyœrodkowany
+	window.draw(hpText);
+
+	// Pasek many (t³o)
+	sf::RectangleShape manaBarBack(sf::Vector2f(180.f, 20.f)); // analogicznie jak zdrowie
+	manaBarBack.setFillColor(sf::Color(100, 100, 100));
+	manaBarBack.setPosition({ 14.f, 44.f }); // 10 px od góry + 24 (wysokoœæ t³a zdrowia) + 6 px odstêpu
+
+	// Pasek many (aktualny)
+	sf::RectangleShape manaBar(sf::Vector2f(180.f * (float)eq.mana / eq.maxMana, 20.f));
+	manaBar.setFillColor(sf::Color(20, 20, 250));
+	manaBar.setPosition({ 14.f, 44.f });
 
 	window.draw(manaBarBack);
 	window.draw(manaBar);
 
+	// Tekst many
+	sf::Text ManaText(globalFont, std::to_string(eq.mana) + " / " + std::to_string(eq.maxMana), 12);
+	ManaText.setFont(globalFont);
+	ManaText.setCharacterSize(12);
+	ManaText.setFillColor(sf::Color::White);
+	ManaText.setPosition(sf::Vector2f(14.f + 90.f - ManaText.getLocalBounds().size.x / 2.f, 44.f + 2.f));
+	window.draw(ManaText);
 };
-
-
 
 
 
@@ -68,10 +87,10 @@ void Player::updateAnimation(float deltaTime) {
 		if (attackTimer >= attackDuration) {
 			isAttacking = false;
 			currentFrame = 0;
-			currentRow = 0; // wrÃ³Ã¦ do idle lub chodzenia po zakoÃ±czeniu ataku
+			currentRow = 0; 
 		}
 		else {
-			currentRow = attackDirection; // ustaw wiersz animacji na kierunek ataku
+			currentRow = attackDirection; 
 		}
 	}
 	else {
@@ -79,7 +98,7 @@ void Player::updateAnimation(float deltaTime) {
 			frameTimer = 0.f;
 			currentFrame = (currentFrame + 1) % frameCount;
 		}
-		// normalna animacja (idle lub chodzenie)
+		
 		
 	}
 
@@ -88,7 +107,7 @@ void Player::updateAnimation(float deltaTime) {
 
 
 
-		// Wyznacz prostokÂ¹t: (klatka_x, klatka_y)
+		// Wyznacz prostok¹t: (klatka_x, klatka_y)
 		sf::Vector2i framePos = {
 			currentFrame * frameSize.x,
 			currentRow * frameSize.y
@@ -104,7 +123,7 @@ void Player::movePlayer(const sf::Vector2u& windowSize, float deltaTime) {
 	if (!sprite.has_value()) return;
 
 	float speed = 200.0f;
-	sf::Vector2f movement(0.f, 0.f);
+	sf::Vector2f movement(0.f, 0.f); 
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::W))
 		movement.y -= speed;
@@ -125,10 +144,10 @@ void Player::movePlayer(const sf::Vector2u& windowSize, float deltaTime) {
 			currentRow = 1; // chodzenie
 			sprite->move(movement);
 
-			
+			// Zapamiêtaj ostatni kierunek ruchu 
 			lastMovement = movement;
 
-			// Ustaw flip zaleÂ¿nie od kierunku ruchu (x)
+			// Ustaw flip zale¿nie od kierunku ruchu (x)
 			if (movement.x < 0) {
 				sprite->setScale({ -1.f, 1.f });
 				isFacingLeft = true;
@@ -139,7 +158,7 @@ void Player::movePlayer(const sf::Vector2u& windowSize, float deltaTime) {
 			}
 		}
 		else {
-			currentRow = 0; 
+			currentRow = 0;
 		}
 
 		if (!isAttacking && sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::Space)) {
@@ -150,15 +169,15 @@ void Player::movePlayer(const sf::Vector2u& windowSize, float deltaTime) {
 				else direction = 2;                       // atak lewo (flip animacji prawej)
 			}
 			else {
-				if (lastMovement.y > 0) direction = 4;   // atak dÃ³Â³
-				else direction = 6;                       // atak gÃ³ra
+				if (lastMovement.y > 0) direction = 4;   // atak dó³
+				else direction = 6;                       // atak góra
 			}
 
 			startAttack(direction);
 		}
 	}
 
-	// Kolizja i ograniczenia ekranu jak wczeÅ“niej...
+	// Kolizja i ograniczenia ekranu 
 
 	sf::Vector2f newPos = sprite->getPosition();
 
@@ -187,17 +206,24 @@ void Player::startAttack(int direction) {
 		attackDirection = direction;
 		currentFrame = 0;
 
-		
-		if (attackDirection == 2) { 
+		// Skalowanie sprite (flip) jeœli atak w lewo
+		if (attackDirection == 2) {  
 			sprite->setScale({ -1.f, 1.f });  // flip poziomy
 			isFacingLeft = true;
 		}
 		else {
-			sprite->setScale({ 1.f, 1.f });   // normalny kierunek
+			sprite->setScale({ 1.f, 1.f });  
 			isFacingLeft = false;
 		}
 	}
 }
 
+
+sf::Vector2f Player::getPosition() const {
+	if (sprite.has_value()) {
+		return sprite->getPosition();
+	}
+	return sf::Vector2f(0.f, 0.f); // lub inna wartoœæ domyœlna
+}
 
 

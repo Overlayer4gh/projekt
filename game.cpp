@@ -13,6 +13,14 @@ using namespace std;
 void Game::initVariables() {
 	this->window = nullptr;
 }
+void Game::initGlobals() {
+		if (!globalFont.openFromFile("assets/global.ttf")) {
+			// obs³uga b³êdu - np. wyrzuæ wyj¹tek lub wypisz b³¹d
+			throw std::runtime_error("Nie mo¿na za³adowaæ czionki globalFont");
+		}
+	
+
+}
 
 void Game::initWindow() {
 	this->videoMode.size = { 1280,640 };
@@ -59,6 +67,7 @@ Game::Game(){
 	this->initWindow();
 	//this->triangle2.initTextures();
 	this->initMap();
+	this->initGlobals();
 }
 
 
@@ -95,9 +104,11 @@ const bool Game::running() const {
 void Game::update() {
 	this->pollEvents();
 	float deltaTime = 1.f / 144.f; // deltatime
+	sf::Vector2f playerPos = player.getPosition(); // pobieranie pozycji gracza
 	player.updateAnimation(deltaTime);
-	enemy.update(deltaTime); // na chwile
+	enemy.update(deltaTime, playerPos); // na chwile
 	player.movePlayer(this->window->getSize(),deltaTime);
+
 
 	cout << "mouse position: " << sf::Mouse::getPosition(*this->window).x << " " << sf::Mouse::getPosition(*this->window).y << endl;
 }
