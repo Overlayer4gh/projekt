@@ -50,6 +50,17 @@ int::Game::initMap() {
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
 /*void::Game::initEnemies() {
 	//this->enemy.setPosition();
 	this->enemy.setSize(sf::Vector2f(100.f, 100.f));
@@ -68,6 +79,11 @@ Game::Game(){
 	//this->triangle2.initTextures();
 	this->initMap();
 	this->initGlobals();
+	//enemies.push_back(std::make_unique<Enemy>());
+	//enemies.push_back(std::make_unique<Enemy>());
+
+
+
 }
 
 
@@ -77,6 +93,43 @@ Game::~Game() {
 }
 
 //funkcje
+
+
+void Game::checkPlayerAttack(Player& player, std::vector<std::unique_ptr<Enemy>>& enemies) {
+	if (player.isCurrentlyAttacking()) {
+		sf::FloatRect playerHitbox = player.getAttackHitbox();
+
+		for (auto& enemy : enemies) {
+			if (!enemy->wasDamagedThisAttack) {
+				const sf::FloatRect playerHitbox = player.getAttackHitbox();
+				const sf::FloatRect enemyBounds = enemy->getBounds();
+
+				if (playerHitbox.position.x < enemyBounds.position.x + enemyBounds.size.x &&
+					playerHitbox.position.x + playerHitbox.size.x > enemyBounds.position.x &&
+					playerHitbox.position.y < enemyBounds.position.y + enemyBounds.size.y &&
+					playerHitbox.position.y + playerHitbox.size.y > enemyBounds.position.y)
+				{
+					enemy->eq.takeDamage(player.eq.attackPower);
+					enemy->wasDamagedThisAttack = true;
+					std::cout << "Enemy damaged! Remaining HP: " << enemy->eq.hp << std::endl;
+				}
+			}
+		}
+	}
+	else {
+		for (auto& enemy : enemies) {
+			enemy->wasDamagedThisAttack = false;
+		}
+	}
+}
+
+
+
+
+
+
+
+
 
 void Game::pollEvents() {
 	
@@ -95,6 +148,64 @@ void Game::pollEvents() {
 
 };
 
+void Game::startlevel(int levelNumber) {
+	currentLevel = std::make_unique<Level>(levelNumber);
+	enemies.clear();
+	for (int i = 0; i < currentLevel->enemyCount; ++i) {
+		enemies.push_back(std::make_unique<Enemy>());
+	}
+	if (currentLevel->hasBoss) {
+		enemies.clear();
+		enemies.push_back(std::make_unique<Boss>());
+	}
+}
+
+void Game::increaselevel() {
+	++currentLevelNumber;
+	startlevel(currentLevelNumber);
+}
+
+
+
+
+void Game::RenderGameOver() {
+	sf::Text gameOverText( globalFont, "GAME OVER",  120); // font i rozmiar w konstruktorze
+	gameOverText.setFillColor(sf::Color::Red);
+	gameOverText.setStyle(sf::Text::Bold);
+
+	// Wyœrodkowanie tekstu na ekranie
+	sf::FloatRect textRect = gameOverText.getLocalBounds();
+	gameOverText.setOrigin(sf::Vector2f(textRect.size.x / 2.f, textRect.size.y / 2.f));
+	gameOverText.setPosition(sf::Vector2f(
+		static_cast<float>(window->getSize().x) / 2.f,
+		static_cast<float>(window->getSize().y) / 2.f - 50.f
+	));
+
+	window->draw(gameOverText);
+
+
+};
+
+void Game::renderLevelNumber() {
+	sf::Text LevelNumberText(globalFont, "Level: " + std::to_string(currentLevelNumber), 32);
+	LevelNumberText.setFillColor(sf::Color::White);
+	sf::FloatRect textRect = LevelNumberText.getLocalBounds();
+	float margin = 60.f;
+	float posX = static_cast<float>(window->getSize().x) - textRect.size.x - margin;
+	float posY = 20.f;
+
+	LevelNumberText.setPosition(sf::Vector2f(posX, posY));
+
+	window->draw(LevelNumberText);
+
+};
+
+
+
+
+
+
+
 
 
 const bool Game::running() const {
@@ -106,11 +217,25 @@ void Game::update() {
 	float deltaTime = 1.f / 144.f; // deltatime
 	sf::Vector2f playerPos = player.getPosition(); // pobieranie pozycji gracza
 	player.updateAnimation(deltaTime);
-	enemy.update(deltaTime, playerPos); // na chwile
+	// enemy.update(deltaTime, playerPos, player); // na chwile
 	player.movePlayer(this->window->getSize(),deltaTime);
+	for (auto& enemy : enemies) {
+		if (enemy) {
+			enemy->update(deltaTime, player.getPosition(), player);
+		}
+		if (enemy && enemy->isDead) {
+			this->enemies.erase(std::remove_if(enemies.begin(), enemies.end(),
+				[](const std::unique_ptr<Enemy>& e) { return e->isDead; }), enemies.end());
+		}
+	}
+	if (enemies.empty()) {
+		increaselevel();
 
+	}
 
-	cout << "mouse position: " << sf::Mouse::getPosition(*this->window).x << " " << sf::Mouse::getPosition(*this->window).y << endl;
+	checkPlayerAttack(player, enemies);
+
+	// cout << "mouse position: " << sf::Mouse::getPosition(*this->window).x << " " << sf::Mouse::getPosition(*this->window).y << endl;	
 }
 
 
@@ -122,11 +247,21 @@ void Game::render() {
 	//rysowanie 
 
 	this->window->draw(this->map);
+	renderLevelNumber();
 	if (player.sprite.has_value()) {
 		this->window->draw(*player.sprite);
 		player.render(*this->window);
-		enemy.render(*this->window);
+		for (auto& enemy : enemies) {
+			enemy->render(*this->window);
+		}
+	}
+	if (player.eq.hp == 0) {
+		RenderGameOver();
+		
+
 	}
 
+
 	this->window->display();
+	
 }

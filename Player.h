@@ -19,6 +19,8 @@ public:
 	void startAttack(int direction);
 	void render(sf::RenderWindow& window);
 	sf::Vector2f getPosition() const;  // dodane do pobierania pozycji gracza
+	sf::FloatRect getAttackHitbox() const; // zwraca prostok¹t reprezentuj¹cy hitbox ataku
+	bool isCurrentlyAttacking() const; // sprawdza, czy gracz aktualnie atakuje
 
 	// poruszanie i animacje
 	int currentFrame = 0;

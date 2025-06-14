@@ -177,7 +177,7 @@ void Player::movePlayer(const sf::Vector2u& windowSize, float deltaTime) {
 		}
 	}
 
-	// Kolizja i ograniczenia ekranu 
+	// Kolizja , ograniczenia ekranu 
 
 	sf::Vector2f newPos = sprite->getPosition();
 
@@ -216,6 +216,33 @@ void Player::startAttack(int direction) {
 			isFacingLeft = false;
 		}
 	}
+}
+
+		//hitbox
+
+sf::FloatRect Player::getAttackHitbox() const {				
+	if (!isAttacking || !sprite.has_value()) return sf::FloatRect();
+
+	sf::Vector2f pos = sprite->getPosition();
+	float range = 40.f; // zasiêg ataku
+	sf::Vector2f size(40.f, 40.f);
+	sf::Vector2f offset;
+
+	switch (attackDirection) {
+	case 2: offset = { -range, 0.f }; break;  // lewo
+	case 3: offset = { range, 0.f }; break;   // prawo
+	case 4: offset = { 0.f, range }; break;   // dó³
+	case 6: offset = { 0.f, -range }; break;  // góra
+	default: offset = { 0.f, 0.f }; break;
+	}
+
+	sf::Vector2f center = pos + offset;
+	sf::Vector2f topLeft(center.x - size.x / 2.f, center.y - size.y / 2.f);
+	return sf::FloatRect(topLeft, size);
+}
+
+bool Player::isCurrentlyAttacking() const {
+	return isAttacking;
 }
 
 
